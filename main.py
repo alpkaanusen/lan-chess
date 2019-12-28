@@ -163,6 +163,7 @@ def start_game(color):
     print("starting game")
 
 def sendMove():
+    print()
  
 if __name__ == '__main__':
     #response threads always runs on background
