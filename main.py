@@ -4,6 +4,13 @@ import chess_engine
 PORT = 12345
 BUFFER_SIZE = 1500
 
+#this is a workaround, but I could not get any other solution working
+#opens a socket to google.com, gets the ip address from that connection and closes it without sending anything
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
+IP = s.getsockname()[0]
+s.close()
+
 SOCKET = None
 
 def connect(username, game_id, i):
@@ -78,9 +85,9 @@ if __name__ == '__main__':
     username = input("Please enter a username: ")
     while True:
         try:
-            game_id = int(input("Create a game(0) or join a game if you have the game id:"))
-            if game_id == 0:
-                game_id = str(time.clock())[0:6] #first six digits of the timestamp
+            game_id = input("Create a game(create) or join a game if you have the game id:").lower()
+            if game_id == 'create':
+                game_id = str(time.process_time_ns())[0:6] #six digits of the timestamp
                 print("Your game id: " + game_id)
                 create_game(username, game_id)
             else:
@@ -93,4 +100,4 @@ if __name__ == '__main__':
                     #play game
                     print()
         except Exception as e:
-            print("Please enter an integer: " + str(e))
+            print("Please enter a valid game id: " + str(e))
