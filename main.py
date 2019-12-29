@@ -162,7 +162,7 @@ def print_connected_hosts():
 def start_game(color, name):
     global connected_ip
     global game
-    game = ChessGame(color, IP, connected_ip)
+    game = ChessGame(color, IP, connected_ip, name)
     game.show()
     lan_chess.exec()
 
@@ -205,6 +205,7 @@ if __name__ == '__main__':
         try:
             if playing:
                 start_game(color, username)
+            playing = False
             host_index = int(input("Choose player to invite to a game of chess(-1 to see online players, -2 to check invites , -3 to exit): "))
             if host_index == -3:
                 print("exiting")
