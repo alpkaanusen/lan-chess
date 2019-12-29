@@ -39,6 +39,12 @@ def join_game(username, game_id):
         connect_thread = threading.Thread(target=connect, args=[username, game_id, i])
 
 def start_game(color):
+    '''
+    chessTitan = QApplication([])
+    window = MainWindow(chess.WHITE)
+    window.show()
+    chessTitan.exec()
+    '''
     print("starting game")
 
 def sendMove():
