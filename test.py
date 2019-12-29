@@ -46,7 +46,8 @@ def response_tcp():
                 message = message[1:len(message)-1] # remove brackets
                 message = message.replace(", ", ",") #remove whitespace
                 message = message.split(",")
-                conn.send(str.encode(RESPONSE_PACKET))
+                #conn.send(str.encode(RESPONSE_PACKET))
+                global playing
                 if message[2] == 'invite' and not playing:
                     answer = ''
                     while answer != 'a' and answer != 'r':
@@ -56,8 +57,18 @@ def response_tcp():
                         if connected:
                             playing = True
                             start_game(chess.BLACK)
+                        else:
+                            print("could not connect")
                     else:
                         send_message(message[1], 'reject')
+                elif message[2] == "accept":
+                    send_answer(message[1], 'received')
+                    print("Starting game with " + host_name)
+                    start_game(chess.WHITE)
+                elif response[2] == "reject":
+                    send_answer(message[1], 'received')
+                    print(host_name + " rejected your invite")
+                    print()
                 elif message[2] == 'move':
                     print()
             except Exception as e:
@@ -110,6 +121,7 @@ def send_answer(host_ip, answer):
         response = response[1:len(response)-1] # remove brackets
         response = response.replace(" ", "")
         response = response.split(",")
+        print(response)
         if response[2] == "received" and answer == 'accept':
             return True
         else:
@@ -122,9 +134,10 @@ def send_invite(host_name, host_ip):
     MESSAGE_PACKET = ('[%s, %s, invite]' % (NAME, IP))
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        s.settimeout(5)
+        s.settimeout(30)
         s.connect((host_ip, PORT))
         s.send(str.encode(MESSAGE_PACKET))
+        '''
         while True:
             data = s.recv(BUFFER_SIZE)
             if data:
@@ -133,6 +146,7 @@ def send_invite(host_name, host_ip):
         response = response[1:len(response)-1] # remove brackets
         response = response.replace(" ", "")
         response = response.split(",")
+        print(response)
         if response[2] == "accept":
             send_answer(message[1], 'received')
             print("Starting game with " + host_name)
@@ -141,6 +155,7 @@ def send_invite(host_name, host_ip):
             send_answer(message[1], 'received')
             print(host_name + " rejected your invite")
             print()
+        '''
     except Exception as e:
         print("Error connecting, try again: " + str(e))
     s.close()
