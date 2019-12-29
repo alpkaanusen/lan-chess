@@ -30,12 +30,14 @@ BUFFER_SIZE = 1500
 NAME = ''
 
 def announce():
+    global NAME
     announce_lock = True #do not allow another round to start
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #UDP message
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     try:
         s.settimeout(1)
         ANNOUNCE_PACKET = ('[%s, %s, announce]' % (NAME, IP))
+        print(NAME)
         s.sendto(str.encode(ANNOUNCE_PACKET), ('<broadcast>', UDP_PORT))
     except:
     	s.close()
