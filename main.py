@@ -102,9 +102,11 @@ def response_tcp():
                         send_answer(message[1], 'accept')
                     else:
                         send_message(message[1], 'reject')
+                    color = chess.BLACK
+                    connected_ip = message[1]
+                    playing = True
                     pending_invite = False
                 elif message[2] == "accept":
-                    send_answer(message[1], 'received_accept')
                     print("Starting game with " + message[0])
                     print()
                     color = chess.WHITE
@@ -112,7 +114,6 @@ def response_tcp():
                     playing = True
                     waiting_answer = False
                 elif message[2] == "reject":
-                    send_answer(message[1], 'received_reject')
                     print(message[0] + " rejected your invite")
                     print()
                     waiting_answer = False
