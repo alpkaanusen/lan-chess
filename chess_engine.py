@@ -73,7 +73,7 @@ class ChessGame(QWidget):
                             else:
                                 self.check = None
                             if self.chessboard.is_game_over():
-                                showGameOverMessage("Result: " + str(self.chessboard.result()))
+                                self.showGameOverMessage("Result: " + str(self.chessboard.result()))
                         self.squareToMove = None
                         self.selectedPiece = None
                         self.squares = None 
@@ -114,6 +114,6 @@ class ChessGame(QWidget):
                 showGameOverMessage("Result: " + str(self.chessboard.result()))
     
     def showGameOverMessage(self, message):
-        message = QMessageBox.Information(self, 'Game over', message)
-        message.exec_()
+        QMessageBox.about(self, "Game Over", message)
+        #message = QMessageBox.question(self, 'PyQt5 message', "Do you like PyQt5?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         self.close()
