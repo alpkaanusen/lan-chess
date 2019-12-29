@@ -71,6 +71,7 @@ def create_game(username, game_id):
                 conn.send(str.encode(RESPONSE_PACKET))
                 #do key exchange then start the game
                 start_game(chess.WHITE)
+
                 game_over = False
                 while not game_over:
                     #send and receive moves
@@ -99,11 +100,12 @@ if __name__ == '__main__':
             else:
                 join_game(username, game_id)
                 print("Connecting...")
-                time.sleep(1)
-                if not SOCKET:
+                while SOCKET is None:
+                	pass
+                if SOCKET is None:
                     print("Could not find game")
                 else:
                     #play game
-                    print()
+                    print("connected")
         except Exception as e:
             print("Please enter a valid game id: " + str(e))
