@@ -26,6 +26,7 @@ class ChessGame(QWidget):
         self.squares = None
         self.lastMove = None
         self.check = None
+        self.moveToSend = moveToSend
     
     @pyqtSlot(QWidget)
     def mousePressEvent(self, event):
@@ -54,6 +55,7 @@ class ChessGame(QWidget):
                             self.chessboard.push(move)
                             self.lastMove = move
                             #to-do: send the move to the opponent
+                            self.moveToSend = move
                             if self.chessboard.is_check():
                                 self.check = self.chessboard.king(self.chessboard.turn) # finds the checked king
                             else:
@@ -87,6 +89,7 @@ class ChessGame(QWidget):
     
     #for opponent's moves
     def makeMove(self, move):
+        move = chess.Move.from_uci(move)
         if move in self.chessboard.legal_moves:
             self.chessboard.push(move)
             self.lastMove = move

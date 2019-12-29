@@ -10,7 +10,7 @@ connected_hosts = []
 connected_ips = []
 playing = False
 color = False
-kill_threads = False #used to terminate background threads 
+connected_ip = ''
 announce_lock = False # used to start another round of announcement messages after the previous one is completed
 #this is a workaround, but I could not get any other solution working
 #opens a socket to google.com, gets the ip address from that connection and closes it without sending anything
@@ -54,6 +54,7 @@ def response_tcp():
                 message = message.split(",")
                 #conn.send(str.encode(RESPONSE_PACKET))
                 global playing
+                global color
                 if message[2] == 'invite' and not playing:
                     answer = ''
                     while answer != 'a' and answer != 'r':
@@ -65,16 +66,21 @@ def response_tcp():
                 elif message[2] == "accept":
                     send_answer(message[1], 'received_accept')
                     print("Starting game with ")
-                    playing = True
                     color = chess.WHITE
+                    print("thread" + str(color))
+                    connected_ip = message[1]
+                    playing = True
                     #start_game(chess.WHITE)
                 elif message[2] == "reject":
                     send_answer(message[1], 'received_reject')
                     print(" rejected your invite")
                     print()
                 if message[2] == "received_accept":
-                    playing = True
+                    print("starting game")
                     color = chess.BLACK
+                    print("thread" + str(color))
+                    connected_ip = message[1]
+                    playing = True
                     #start_game(chess.BLACK)
                 elif message[2] == 'move':
                     print()
@@ -180,14 +186,29 @@ def print_connected_hosts():
             i += 1
     print()
 
-def start_game(color):
+def start_game(color, move):
     
-    window = ChessGame(color)
-    window.show()
+    game = ChessGame(color, move)
+    game.show()
+
+    move_thread = threading.Thread(target=send_move, args=[game])
     lan_chess.exec()
 
-def sendMove():
-    print()
+def send_move(game):
+    while True:
+        if game.moveToSend is not None:
+            move = game.moveToSend.uci()
+            MESSAGE_PACKET = ('[%s, %s, move, %s]' % (NAME, IP, move))
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                s.settimeout(30)
+                s.connect((host_ip, PORT))
+                s.send(str.encode(MESSAGE_PACKET))
+                
+            except Exception as e:
+                print("Error connecting, try again: " + str(e))
+            s.close()
+            game.moveToSend = None
 
 if __name__ == '__main__':
     #response threads always runs on background
@@ -205,6 +226,7 @@ if __name__ == '__main__':
     while True:
         try:
             if playing:
+                print(color)
                 start_game(color)
             host_index = int(input("Choose player to invite to a game of chess(-1 to see online players, -2 to exit): "))
             if host_index == -2:
