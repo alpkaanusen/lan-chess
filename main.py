@@ -101,13 +101,12 @@ def response_tcp():
                         answer = input(message[0] + " invites you to a game of chess, (A)ccept or (R)eject: ").lower()
                     if answer == 'a':
                         send_answer(message[1], 'accept')
+                        color = chess.BLACK
+                        connected_ip = message[1]
+                        playing = True
                     else:
                         send_answer(message[1], 'reject')
                         pending_invite = False
-                    color = chess.BLACK
-                    connected_ip = message[1]
-                    playing = True
-                    
                 elif message[2] == "accept":
                     send_answer(message[1], "received_accept")
                     print("Starting game with " + message[0])
