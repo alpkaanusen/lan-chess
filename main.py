@@ -117,7 +117,7 @@ def response_udp():
                     connected_ips.append(message[1])
                     #send response, try 3 times for safety
                     for _ in range(0,3):
-                        s.sendto(str.encode(RESPONSE_PACKET), (message[1], PORT))
+                        s.sendto(str.encode(RESPONSE_PACKET), (message[1], UDP_PORT))
                 elif message[2] == 'response' and message[1] not in connected_ips:
                     connected_hosts.append((message[0], message[1])) #get name and ip
                     connected_ips.append(message[1])
