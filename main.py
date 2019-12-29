@@ -23,7 +23,8 @@ tmp.connect(("8.8.8.8", 80))
 IP = tmp.getsockname()[0]
 tmp.close()
 
-PORT = 12345
+TCP_PORT = 5000
+UDP_PORT = 3000
 BUFFER_SIZE = 1500
 NAME = ''
  
@@ -36,7 +37,7 @@ def announce():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     try:
         s.settimeout(1)
-        s.sendto(str.encode(ANNOUNCE_PACKET), ('<broadcast>', PORT))
+        s.sendto(str.encode(ANNOUNCE_PACKET), ('<broadcast>', UDP_PORT))
     except:
     	s.close()
     s.close()
@@ -46,7 +47,7 @@ def response_tcp():
     global connected_ip
     global game
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((IP,PORT))
+    s.bind((IP,TCP_PORT))
     s.listen(5)
     while True:
         conn, addr = s.accept()
@@ -98,7 +99,7 @@ def response_tcp():
 
 def response_udp():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('',PORT))
+    s.bind(('',UDP_PORT))
     while True:
         while True:
             try:
@@ -130,7 +131,7 @@ def send_answer(host_ip, answer):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.settimeout(5)
-        s.connect((host_ip, PORT))
+        s.connect((host_ip, TCP_PORT))
         s.send(str.encode(MESSAGE_PACKET))
     except Exception as e:
         print("Error sending the message, try again: " + str(e))
@@ -141,7 +142,7 @@ def send_invite(host_name, host_ip):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.settimeout(30)
-        s.connect((host_ip, PORT))
+        s.connect((host_ip, TCP_PORT))
         s.send(str.encode(MESSAGE_PACKET))
     except Exception as e:
         print("Error connecting, try again: " + str(e))
@@ -174,7 +175,7 @@ def send_move(game):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 s.settimeout(30)
-                s.connect((connected_ip, PORT))
+                s.connect((connected_ip, TCP_PORT))
                 s.send(str.encode(MESSAGE_PACKET))
             except Exception as e:
                 print("Error connecting, try again: " + str(e))
