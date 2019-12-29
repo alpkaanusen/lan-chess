@@ -103,7 +103,7 @@ def response_tcp():
                         send_answer(message[1], 'accept')
                     else:
                         send_answer(message[1], 'reject')
-                        pending_invite = True
+                        pending_invite = False
                     color = chess.BLACK
                     connected_ip = message[1]
                     playing = True
