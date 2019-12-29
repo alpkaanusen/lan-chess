@@ -67,7 +67,6 @@ def response_tcp():
                 if message[2] == "received_accept":
                     playing = True
                     start_game(chess.BLACK)
-                    print("starting game")
                 elif message[2] == 'move':
                     print()
             except Exception as e:
@@ -171,8 +170,12 @@ def print_connected_hosts():
             print(str(i) + ". " + host[0] + " - " + host[1])
             i += 1
     print()
+
 def start_game(color):
-    print("starting game")
+    lan_chess = QApplication([])
+    window = ChessGame(color)
+    window.show()
+    lan_chess.exec()
 
 def sendMove():
     print()
