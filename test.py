@@ -1,9 +1,15 @@
 import socket, time, threading, chess
-import chess_engine
+from chess_engine import ChessGame
+import chess
+import chess.svg
+from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
 
 connected_hosts = []
 connected_ips = []
 playing = False
+color = False
 kill_threads = False #used to terminate background threads 
 announce_lock = False # used to start another round of announcement messages after the previous one is completed
 #this is a workaround, but I could not get any other solution working
@@ -59,14 +65,17 @@ def response_tcp():
                 elif message[2] == "accept":
                     send_answer(message[1], 'received_accept')
                     print("Starting game with ")
-                    start_game(chess.WHITE)
+                    playing = True
+                    color = chess.WHITE
+                    #start_game(chess.WHITE)
                 elif message[2] == "reject":
                     send_answer(message[1], 'received_reject')
                     print(" rejected your invite")
                     print()
                 if message[2] == "received_accept":
                     playing = True
-                    start_game(chess.BLACK)
+                    color = chess.BLACK
+                    #start_game(chess.BLACK)
                 elif message[2] == 'move':
                     print()
             except Exception as e:
@@ -172,7 +181,7 @@ def print_connected_hosts():
     print()
 
 def start_game(color):
-    lan_chess = QApplication([])
+    
     window = ChessGame(color)
     window.show()
     lan_chess.exec()
@@ -187,12 +196,16 @@ if __name__ == '__main__':
     response_udp_thread = threading.Thread(target=response_udp)
     response_udp_thread.start()
     #announce 3 times on startup
+    lan_chess = QApplication([])
+
     for i in range(0,3):
         while announce_lock:
             continue #wait while the first round finishes
         announce()
     while True:
         try:
+            if playing:
+                start_game(color)
             host_index = int(input("Choose player to invite to a game of chess(-1 to see online players, -2 to exit): "))
             if host_index == -2:
                 print("exiting")
