@@ -1,4 +1,5 @@
 import chess
+import socket
 import chess.svg
 from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtSvg import QSvgWidget
@@ -28,6 +29,7 @@ class ChessGame(QWidget):
         self.check = None
         self.connected_ip = connected_ip
         self.ip = ip
+        self.port = 12345
     
     @pyqtSlot(QWidget)
     def mousePressEvent(self, event):
@@ -57,13 +59,12 @@ class ChessGame(QWidget):
                             self.lastMove = move
                             #to-do: send the move to the opponent
                             move = move.uci()
-                            MESSAGE_PACKET = ('[%s, %s, move, %s]' % (NAME, self.ip, move))
+                            MESSAGE_PACKET = ('[%s, %s, move, %s]' % ('NAME', self.ip, move))
                             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                             try:
                                 s.settimeout(5)
-                                s.connect((self.connected_ip, PORT))
+                                s.connect((self.connected_ip, self.port))
                                 s.send(str.encode(MESSAGE_PACKET))
-                                print("move sent")
                             except Exception as e:
                                 print("Error connecting, try again: " + str(e))
                             s.close()

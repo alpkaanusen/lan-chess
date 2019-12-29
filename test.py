@@ -10,6 +10,7 @@ connected_hosts = []
 connected_ips = []
 playing = False
 color = False
+game = None
 connected_ip = ''
 announce_lock = False # used to start another round of announcement messages after the previous one is completed
 #this is a workaround, but I could not get any other solution working
@@ -38,6 +39,8 @@ def announce():
     announce_lock = False
     
 def response_tcp():
+    global connected_ip
+    global game
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((IP,PORT))
     s.listen(5)
@@ -82,8 +85,9 @@ def response_tcp():
                     connected_ip = message[1]
                     playing = True
                     #start_game(chess.BLACK)
-                elif message[2] == 'move':
-                    print(message[3])
+                elif message[2] == 'move' and playing:
+                    move = message[3]
+                    game.makeMove(move)
             except Exception as e:
                 print (str(e))
                 break
@@ -187,7 +191,8 @@ def print_connected_hosts():
     print()
 
 def start_game(color):
-    
+    global connected_ip
+    global game
     game = ChessGame(color, IP, connected_ip)
     game.show()
     lan_chess.exec()
@@ -225,7 +230,6 @@ if __name__ == '__main__':
     while True:
         try:
             if playing:
-                print(color)
                 start_game(color)
             host_index = int(input("Choose player to invite to a game of chess(-1 to see online players, -2 to exit): "))
             if host_index == -2:
