@@ -27,9 +27,6 @@ TCP_PORT = 5000
 UDP_PORT = 3000
 BUFFER_SIZE = 1500
 NAME = ''
- 
-ANNOUNCE_PACKET = ('[%s, %s, announce]' % (NAME, IP))
-RESPONSE_PACKET = ('[%s, %s, response]' % (NAME, IP))
 
 def announce():
     announce_lock = True #do not allow another round to start
@@ -37,6 +34,7 @@ def announce():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     try:
         s.settimeout(1)
+        ANNOUNCE_PACKET = ('[%s, %s, announce]' % (NAME, IP))
         s.sendto(str.encode(ANNOUNCE_PACKET), ('<broadcast>', UDP_PORT))
     except:
     	s.close()
@@ -63,6 +61,7 @@ def response_udp():
                     connected_ips.append(message[1])
                     #send response, try 3 times for safety
                     for _ in range(0,3):
+                        RESPONSE_PACKET = ('[%s, %s, response]' % (NAME, IP))
                         s.sendto(str.encode(RESPONSE_PACKET), (message[1], UDP_PORT))
                 elif message[2] == 'response' and message[1] not in connected_ips:
                     connected_hosts.append((message[0], message[1])) #get name and ip
@@ -90,7 +89,6 @@ def response_tcp():
                 message = message[1:len(message)-1] # remove brackets
                 message = message.replace(", ", ",") #remove whitespace
                 message = message.split(",")
-                #conn.send(str.encode(RESPONSE_PACKET))
                 global playing
                 global color
                 if message[2] == 'invite' and not playing:
@@ -126,7 +124,6 @@ def response_tcp():
                 break
         conn.close()
     s.close()
-
 
 def send_answer(host_ip, answer):
     MESSAGE_PACKET = ('[%s, %s, %s]' % (NAME, IP, answer))
