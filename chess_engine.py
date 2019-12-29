@@ -6,7 +6,7 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
 
 class ChessGame(QWidget):
-    def __init__(self, color, ip, connected_ip):
+    def __init__(self, color, ip, connected_ip, name):
         super().__init__()
 
         self.setWindowTitle("LAN Chess")
@@ -22,14 +22,15 @@ class ChessGame(QWidget):
         self.margin = 0.05*self.cbSize if self.coordinates == True else 0
         self.squareSize  = (self.cbSize - 2 * self.margin) / 8.0
         self.chessboard = chess.Board()
-        self.squareToMove = None
-        self.selectedPiece = None
-        self.squares = None
-        self.lastMove = None
-        self.check = None
-        self.connected_ip = connected_ip
-        self.ip = ip
-        self.port = 12345
+        self.squareToMove = None #square of the selected piece as a string
+        self.selectedPiece = None #selected piece
+        self.squares = None #squares to be selected to show possible moves
+        self.lastMove = None #last move to highlight
+        self.check = None # not None if a player is in check
+        self.connected_ip = connected_ip #opponents ip
+        self.ip = ip #own ip
+        self.port = 12345 #agreed upon port
+        self.name = name #name of the player
     
     @pyqtSlot(QWidget)
     def mousePressEvent(self, event):
@@ -59,7 +60,7 @@ class ChessGame(QWidget):
                             self.lastMove = move
                             #to-do: send the move to the opponent
                             move = move.uci()
-                            MESSAGE_PACKET = ('[%s, %s, move, %s]' % ('NAME', self.ip, move))
+                            MESSAGE_PACKET = ('[%s, %s, move, %s]' % (self.name, self.ip, move))
                             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                             try:
                                 s.settimeout(5)
@@ -105,7 +106,6 @@ class ChessGame(QWidget):
         if move in self.chessboard.legal_moves:
             self.chessboard.push(move)
             self.lastMove = move
-            #to-do: send the move to the opponent
             if self.chessboard.is_check():
                 self.check = self.chessboard.king(self.chessboard.turn) # finds the checked king
             else:
@@ -115,5 +115,4 @@ class ChessGame(QWidget):
     
     def showGameOverMessage(self, message):
         QMessageBox.about(self, "Game Over", message)
-        #message = QMessageBox.question(self, 'PyQt5 message', "Do you like PyQt5?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         self.close()
