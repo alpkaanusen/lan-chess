@@ -53,22 +53,21 @@ def response_tcp():
                     while answer != 'a' and answer != 'r':
                         answer = input(message[0] + " invites you to a game of chess, (A)ccept or (R)eject: ").lower()
                     if answer == 'a':
-                        connected = send_answer(message[1], 'accept')
-                        if connected:
-                            playing = True
-                            start_game(chess.BLACK)
-                        else:
-                            print("could not connect")
+                        send_answer(message[1], 'accept')
                     else:
                         send_message(message[1], 'reject')
                 elif message[2] == "accept":
-                    send_answer(message[1], 'received')
-                    print("Starting game with " + host_name)
+                    send_answer(message[1], 'received_accept')
+                    print("Starting game with ")
                     start_game(chess.WHITE)
-                elif response[2] == "reject":
-                    send_answer(message[1], 'received')
-                    print(host_name + " rejected your invite")
+                elif message[2] == "reject":
+                    send_answer(message[1], 'received_reject')
+                    print(" rejected your invite")
                     print()
+                if message[2] == "received_accept":
+                    playing = True
+                    start_game(chess.BLACK)
+                    print("starting game")
                 elif message[2] == 'move':
                     print()
             except Exception as e:
@@ -113,6 +112,7 @@ def send_answer(host_ip, answer):
         s.settimeout(5)
         s.connect((host_ip, PORT))
         s.send(str.encode(MESSAGE_PACKET))
+        '''
         while True:
             data = s.recv(BUFFER_SIZE)
             if data:
@@ -126,6 +126,7 @@ def send_answer(host_ip, answer):
             return True
         else:
             return False
+        '''
     except Exception as e:
         print("Error sending the message, try again: " + str(e))
     s.close()
