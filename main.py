@@ -42,10 +42,40 @@ def announce():
     	s.close()
     s.close()
     announce_lock = False
+
+def response_udp():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind(('',UDP_PORT))
+    while True:
+        while True:
+            try:
+                data, addr = s.recvfrom(BUFFER_SIZE)
+                if not data: 
+                    break
+                message = data.decode()
+                message = message[1:len(message)-1] # remove brackets
+                message = message.replace(", ", ",") #remove whitespace
+                message = message.split(",")
+                if message[1] == IP:
+                    break
+                if message[2] == 'announce' and message[1] not in connected_ips:
+                    connected_hosts.append((message[0], message[1])) #get name and ip
+                    connected_ips.append(message[1])
+                    #send response, try 3 times for safety
+                    for _ in range(0,3):
+                        s.sendto(str.encode(RESPONSE_PACKET), (message[1], UDP_PORT))
+                elif message[2] == 'response' and message[1] not in connected_ips:
+                    connected_hosts.append((message[0], message[1])) #get name and ip
+                    connected_ips.append(message[1])
+            except Exception as e:
+                print (str(e))
+                break
+    s.close()
     
 def response_tcp():
     global connected_ip
     global game
+    global waiting_answer
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((IP,TCP_PORT))
     s.listen(5)
@@ -97,35 +127,7 @@ def response_tcp():
         conn.close()
     s.close()
 
-def response_udp():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('',UDP_PORT))
-    while True:
-        while True:
-            try:
-                data, addr = s.recvfrom(BUFFER_SIZE)
-                if not data: 
-                    break
-                message = data.decode()
-                message = message[1:len(message)-1] # remove brackets
-                message = message.replace(", ", ",") #remove whitespace
-                message = message.split(",")
-                if message[1] == IP:
-                    break
-                if message[2] == 'announce' and message[1] not in connected_ips:
-                    connected_hosts.append((message[0], message[1])) #get name and ip
-                    connected_ips.append(message[1])
-                    #send response, try 3 times for safety
-                    for _ in range(0,3):
-                        s.sendto(str.encode(RESPONSE_PACKET), (message[1], UDP_PORT))
-                elif message[2] == 'response' and message[1] not in connected_ips:
-                    connected_hosts.append((message[0], message[1])) #get name and ip
-                    connected_ips.append(message[1])
-            except Exception as e:
-                print (str(e))
-                break
-    s.close()
- 
+
 def send_answer(host_ip, answer):
     MESSAGE_PACKET = ('[%s, %s, %s]' % (NAME, IP, answer))
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -166,40 +168,24 @@ def start_game(color, name):
     game.show()
     lan_chess.exec()
 
-def send_move(game):
-    while True:
-        if game.moveToSend is not None:
-            print("sending")
-            move = game.moveToSend.uci()
-            MESSAGE_PACKET = ('[%s, %s, move, %s]' % (NAME, IP, move))
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            try:
-                s.settimeout(30)
-                s.connect((connected_ip, TCP_PORT))
-                s.send(str.encode(MESSAGE_PACKET))
-            except Exception as e:
-                print("Error connecting, try again: " + str(e))
-            s.close()
-            game.moveToSend = None
-
 if __name__ == '__main__':
     #response threads always runs on background
     response_tcp_thread = threading.Thread(target=response_tcp)
     response_tcp_thread.start()
     response_udp_thread = threading.Thread(target=response_udp)
     response_udp_thread.start()
-    #announce 3 times on startup
 
     lan_chess = QApplication([]) #create the Qapplication before everything else or crashes
 
     username = input("Please enter a username: ")
     NAME = username
 
-    #discovery
+    #announce 3 times on startup
     for i in range(0,3):
         while announce_lock:
             continue #wait while the first round finishes
         announce()
+    
     #main loop
     while True:
         try:

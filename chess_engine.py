@@ -29,7 +29,7 @@ class ChessGame(QWidget):
         self.check = None # not None if a player is in check
         self.connected_ip = connected_ip #opponents ip
         self.ip = ip #own ip
-        self.port = 12345 #agreed upon port
+        self.port = 5000 #tcp port for sending moves
         self.name = name #name of the player
     
     @pyqtSlot(QWidget)
