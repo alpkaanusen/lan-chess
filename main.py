@@ -13,6 +13,7 @@ color = False # chess.WHITE = True , chess.BLACK = False
 game = None #to access the game object from main.py
 connected_ip = '' #ip of the player which is currently being played against
 waiting_answer = False # true when an invite is sent and the answer is not yet received
+pending_invite = False # true when an invite is waiting for our answer
 
 announce_lock = False # used to start another round of announcement messages after the previous one is completed
 
@@ -75,6 +76,7 @@ def response_tcp():
     global connected_ip
     global game
     global waiting_answer
+    global pending_invite
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((IP,TCP_PORT))
     s.listen(5)
@@ -92,6 +94,7 @@ def response_tcp():
                 global playing
                 global color
                 if message[2] == 'invite' and not playing:
+                    pending_invite = True
                     answer = ''
                     while answer != 'a' and answer != 'r':
                         answer = input(message[0] + " invites you to a game of chess, (A)ccept or (R)eject: ").lower()
@@ -99,6 +102,7 @@ def response_tcp():
                         send_answer(message[1], 'accept')
                     else:
                         send_message(message[1], 'reject')
+                    pending_invite = False
                 elif message[2] == "accept":
                     send_answer(message[1], 'received_accept')
                     print("Starting game with " + message[0])
@@ -193,7 +197,7 @@ if __name__ == '__main__':
             if host_index == -3:
                 print("exiting")
                 sys.exit()
-            elif host_index == -1:
+            elif host_index == -1 and not pending_invite:
                 print_connected_hosts()
             elif host_index < len(connected_hosts) and host_index >= 0:
                 print("Sending invite to: " + connected_hosts[host_index][0])
