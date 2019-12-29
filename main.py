@@ -145,7 +145,7 @@ def send_answer(host_ip, answer):
         print("Error sending the message, try again: " + str(e))
     s.close()
 
-def send_invite(host_name, host_ip):
+def send_invite(host_ip):
     MESSAGE_PACKET = ('[%s, %s, invite]' % (NAME, IP))
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -212,7 +212,7 @@ if __name__ == '__main__':
             elif host_index < len(connected_hosts) and host_index >= 0:
                 print("Sending invite to: " + connected_hosts[host_index][0])
                 waiting_answer = True
-                send_invite(connected_hosts[host_index][0], connected_hosts[host_index][1])
+                send_invite(connected_hosts[host_index][1])
                 #wait until the answer is received
                 while waiting_answer:
                     pass
