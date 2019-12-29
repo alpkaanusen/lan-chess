@@ -41,7 +41,7 @@ def response_tcp():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((IP,PORT))
     s.listen(5)
-    while True and not kill_threads:
+    while True:
         conn, addr = s.accept()
         while True:
             try:
@@ -83,7 +83,7 @@ def response_tcp():
                     playing = True
                     #start_game(chess.BLACK)
                 elif message[2] == 'move':
-                    print()
+                    print(message[3])
             except Exception as e:
                 print (str(e))
                 break
@@ -93,7 +93,7 @@ def response_tcp():
 def response_udp():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('',PORT))
-    while True and not kill_threads:
+    while True:
         while True:
             try:
                 data, addr = s.recvfrom(BUFFER_SIZE)
@@ -186,25 +186,24 @@ def print_connected_hosts():
             i += 1
     print()
 
-def start_game(color, move):
+def start_game(color):
     
-    game = ChessGame(color, move)
+    game = ChessGame(color, IP, connected_ip)
     game.show()
-
-    move_thread = threading.Thread(target=send_move, args=[game])
     lan_chess.exec()
 
 def send_move(game):
     while True:
         if game.moveToSend is not None:
+            print("sending")
             move = game.moveToSend.uci()
             MESSAGE_PACKET = ('[%s, %s, move, %s]' % (NAME, IP, move))
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 s.settimeout(30)
-                s.connect((host_ip, PORT))
+                s.connect((connected_ip, PORT))
                 s.send(str.encode(MESSAGE_PACKET))
-                
+                print("move sent")
             except Exception as e:
                 print("Error connecting, try again: " + str(e))
             s.close()
@@ -231,9 +230,6 @@ if __name__ == '__main__':
             host_index = int(input("Choose player to invite to a game of chess(-1 to see online players, -2 to exit): "))
             if host_index == -2:
                 print("exiting")
-                kill_threads = True
-                response_tcp_thread.join()
-                response_udp_thread.join()
                 exit()
             elif host_index == -1:
                 print_connected_hosts()

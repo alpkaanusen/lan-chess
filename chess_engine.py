@@ -5,7 +5,7 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
 
 class ChessGame(QWidget):
-    def __init__(self, color):
+    def __init__(self, color, ip, connected_ip):
         super().__init__()
 
         self.setWindowTitle("LAN Chess")
@@ -26,7 +26,8 @@ class ChessGame(QWidget):
         self.squares = None
         self.lastMove = None
         self.check = None
-        self.moveToSend = moveToSend
+        self.connected_ip = connected_ip
+        self.ip = ip
     
     @pyqtSlot(QWidget)
     def mousePressEvent(self, event):
@@ -55,7 +56,17 @@ class ChessGame(QWidget):
                             self.chessboard.push(move)
                             self.lastMove = move
                             #to-do: send the move to the opponent
-                            self.moveToSend = move
+                            move = move.uci()
+                            MESSAGE_PACKET = ('[%s, %s, move, %s]' % (NAME, self.ip, move))
+                            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            try:
+                                s.settimeout(5)
+                                s.connect((self.connected_ip, PORT))
+                                s.send(str.encode(MESSAGE_PACKET))
+                                print("move sent")
+                            except Exception as e:
+                                print("Error connecting, try again: " + str(e))
+                            s.close()
                             if self.chessboard.is_check():
                                 self.check = self.chessboard.king(self.chessboard.turn) # finds the checked king
                             else:
