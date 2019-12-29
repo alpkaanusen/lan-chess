@@ -37,7 +37,6 @@ def announce():
     try:
         s.settimeout(1)
         ANNOUNCE_PACKET = ('[%s, %s, announce]' % (NAME, IP))
-        print(NAME)
         s.sendto(str.encode(ANNOUNCE_PACKET), ('<broadcast>', UDP_PORT))
     except:
     	s.close()
