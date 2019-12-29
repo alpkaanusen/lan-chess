@@ -109,6 +109,7 @@ def response_tcp():
                     playing = True
                     
                 elif message[2] == "accept":
+                    send_answer(message[1], "received_accept")
                     print("Starting game with " + message[0])
                     print()
                     color = chess.WHITE
@@ -197,7 +198,7 @@ if __name__ == '__main__':
             #wait until invite is accepted or rejected
             while pending_invite:
                 pass
-            
+
             if playing:
                 start_game(color, username)
             playing = False
