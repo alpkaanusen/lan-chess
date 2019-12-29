@@ -107,7 +107,7 @@ def response_tcp():
                     color = chess.BLACK
                     connected_ip = message[1]
                     playing = True
-                    pending_invite = False
+                    
                 elif message[2] == "accept":
                     print("Starting game with " + message[0])
                     print()
@@ -123,6 +123,7 @@ def response_tcp():
                     color = chess.BLACK
                     connected_ip = message[1]
                     playing = True
+                    pending_invite = False
                 elif message[2] == 'move' and playing:
                     move = message[3]
                     game.makeMove(move)
@@ -193,9 +194,14 @@ if __name__ == '__main__':
     #main loop
     while True:
         try:
+            #wait until invite is accepted or rejected
+            while pending_invite:
+                pass
+            
             if playing:
                 start_game(color, username)
             playing = False
+
             host_index = int(input("Choose player to invite to a game of chess(-1 to see online players, -2 to check invites , -3 to exit): "))
             if host_index == -3:
                 print("exiting")
